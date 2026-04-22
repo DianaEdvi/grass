@@ -1,0 +1,23 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel InitializeGrass
+
+struct GrassData
+{
+    float4 position;
+};
+
+RWStructuredBuffer<GrassData> _GrassDataBuffer;
+uint Dimension, Scale;
+
+[numthreads(8,8,1)]
+void InitializeGrass (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= Dimension || id.y >= Dimension)
+        return;
+    
+    GrassData data;
+    float4 pos = 0.0f;
+    pos.xz = (id.xy - float(Dimension) * 0.5f) * (1.0f / float(Scale)); // center grass around origin and scale it for better distribution
+    data.position = pos;
+    _GrassDataBuffer[id.x + id.y * Dimension] = data;
+}
